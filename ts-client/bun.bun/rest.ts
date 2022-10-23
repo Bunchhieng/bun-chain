@@ -9,6 +9,22 @@
  * ---------------------------------------------------------------
  */
 
+export interface BunComment {
+  /** @format uint64 */
+  id?: string;
+  creator?: string;
+  title?: string;
+  body?: string;
+
+  /** @format uint64 */
+  postID?: string;
+
+  /** @format int64 */
+  createdAt?: string;
+}
+
+export type BunMsgCreateCommentResponse = object;
+
 export interface BunMsgCreatePostResponse {
   /** @format uint64 */
   id?: string;
@@ -26,6 +42,25 @@ export interface BunPost {
   id?: string;
   title?: string;
   body?: string;
+}
+
+export interface BunQueryAllCommentResponse {
+  Comment?: BunComment[];
+
+  /**
+   * PageResponse is to be embedded in gRPC response messages where the
+   * corresponding request message has used PageRequest.
+   *
+   *  message SomeResponse {
+   *          repeated Bar results = 1;
+   *          PageResponse page = 2;
+   *  }
+   */
+  pagination?: V1Beta1PageResponse;
+}
+
+export interface BunQueryGetCommentResponse {
+  Comment?: BunComment;
 }
 
 export interface BunQueryHelloResponse {
@@ -259,10 +294,52 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title bun/bun/genesis.proto
+ * @title bun/bun/comment.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryCommentAll
+   * @summary Queries a list of Comment items.
+   * @request GET:/bun/bun/comment
+   */
+  queryCommentAll = (
+    query?: {
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<BunQueryAllCommentResponse, RpcStatus>({
+      path: `/bun/bun/comment`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryComment
+   * @summary Queries a Comment by id.
+   * @request GET:/bun/bun/comment/{id}
+   */
+  queryComment = (id: string, params: RequestParams = {}) =>
+    this.request<BunQueryGetCommentResponse, RpcStatus>({
+      path: `/bun/bun/comment/${id}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
   /**
    * No description
    *

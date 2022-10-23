@@ -3,6 +3,7 @@ package bun.bun;
 
 import "gogoproto/gogo.proto";
 import "bun/bun/params.proto";
+import "bun/bun/comment.proto";
 // this line is used by starport scaffolding # genesis/proto/import
 
 option go_package = "bun/x/bun/types";
@@ -10,5 +11,7 @@ option go_package = "bun/x/bun/types";
 // GenesisState defines the bun module's genesis state.
 message GenesisState {
   Params params = 1 [(gogoproto.nullable) = false];
+  repeated Comment commentList = 2 [(gogoproto.nullable) = false];
+  uint64 commentCount = 3;
   // this line is used by starport scaffolding # genesis/proto/state
 }
