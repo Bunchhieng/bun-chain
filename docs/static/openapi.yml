@@ -4,6 +4,38 @@ info:
   name: ''
   description: ''
 paths:
+  /bun/bun/hello:
+    get:
+      summary: Queries a list of Hello items.
+      operationId: BunBunHello
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              text:
+                type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
   /bun/bun/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -45088,6 +45120,11 @@ definitions:
   bun.bun.Params:
     type: object
     description: Params defines the parameters for the module.
+  bun.bun.QueryHelloResponse:
+    type: object
+    properties:
+      text:
+        type: string
   bun.bun.QueryParamsResponse:
     type: object
     properties:

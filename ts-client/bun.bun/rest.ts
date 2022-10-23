@@ -14,6 +14,10 @@
  */
 export type BunParams = object;
 
+export interface BunQueryHelloResponse {
+  text?: string;
+}
+
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */
@@ -158,6 +162,22 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryHello
+   * @summary Queries a list of Hello items.
+   * @request GET:/bun/bun/hello
+   */
+  queryHello = (params: RequestParams = {}) =>
+    this.request<BunQueryHelloResponse, RpcStatus>({
+      path: `/bun/bun/hello`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
   /**
    * No description
    *
