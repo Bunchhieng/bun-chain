@@ -5,6 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "bun/bun/params.proto";
+import "bun/bun/post.proto";
 // this line is used by starport scaffolding # 1
 
 option go_package = "bun/x/bun/types";
@@ -18,6 +19,11 @@ service Query {
   // Queries a list of Hello items.
 	rpc Hello(QueryHelloRequest) returns (QueryHelloResponse) {
 		option (google.api.http).get = "/bun/bun/hello";
+	}
+
+// Queries a list of Posts items.
+	rpc Posts(QueryPostsRequest) returns (QueryPostsResponse) {
+		option (google.api.http).get = "/bun/bun/posts";
 	}
 
 // this line is used by starport scaffolding # 2
@@ -37,6 +43,15 @@ message QueryHelloRequest {
 
 message QueryHelloResponse {
   string text = 1;
+}
+
+message QueryPostsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPostsResponse {
+  repeated Post Post = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 // this line is used by starport scaffolding # 3
