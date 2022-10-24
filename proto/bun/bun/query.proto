@@ -7,6 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "bun/bun/params.proto";
 import "bun/bun/post.proto";
 import "bun/bun/comment.proto";
+
 // this line is used by starport scaffolding # 1
 
 option go_package = "bun/x/bun/types";
@@ -35,6 +36,11 @@ service Query {
 	// Queries a list of Comment items.
 	rpc CommentAll(QueryAllCommentRequest) returns (QueryAllCommentResponse) {
 		option (google.api.http).get = "/bun/bun/comment";
+	}
+
+// Queries a list of Comments items.
+	rpc Comments(QueryCommentsRequest) returns (QueryCommentsResponse) {
+		option (google.api.http).get = "/bun/bun/comments/{id}";
 	}
 
 // this line is used by starport scaffolding # 2
@@ -80,6 +86,17 @@ message QueryAllCommentRequest {
 message QueryAllCommentResponse {
 	repeated Comment Comment = 1 [(gogoproto.nullable) = false];
 	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryCommentsRequest {
+  uint64 id = 1;
+	cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryCommentsResponse {
+  Post post = 1 [(gogoproto.nullable) = false];
+	repeated Comment Comment = 2 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 3;
 }
 
 // this line is used by starport scaffolding # 3

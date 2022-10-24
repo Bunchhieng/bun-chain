@@ -23,9 +23,17 @@ export interface BunComment {
   createdAt?: string;
 }
 
-export type BunMsgCreateCommentResponse = object;
+export interface BunMsgCreateCommentResponse {
+  /** @format uint64 */
+  id?: string;
+}
 
 export interface BunMsgCreatePostResponse {
+  /** @format uint64 */
+  id?: string;
+}
+
+export interface BunMsgDeleteCommentResponse {
   /** @format uint64 */
   id?: string;
 }
@@ -42,9 +50,28 @@ export interface BunPost {
   id?: string;
   title?: string;
   body?: string;
+
+  /** @format int64 */
+  createdAt?: string;
 }
 
 export interface BunQueryAllCommentResponse {
+  Comment?: BunComment[];
+
+  /**
+   * PageResponse is to be embedded in gRPC response messages where the
+   * corresponding request message has used PageRequest.
+   *
+   *  message SomeResponse {
+   *          repeated Bar results = 1;
+   *          PageResponse page = 2;
+   *  }
+   */
+  pagination?: V1Beta1PageResponse;
+}
+
+export interface BunQueryCommentsResponse {
+  post?: BunPost;
   Comment?: BunComment[];
 
   /**
@@ -336,6 +363,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     this.request<BunQueryGetCommentResponse, RpcStatus>({
       path: `/bun/bun/comment/${id}`,
       method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryComments
+   * @summary Queries a list of Comments items.
+   * @request GET:/bun/bun/comments/{id}
+   */
+  queryComments = (
+    id: string,
+    query?: {
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<BunQueryCommentsResponse, RpcStatus>({
+      path: `/bun/bun/comments/${id}`,
+      method: "GET",
+      query: query,
       format: "json",
       ...params,
     });

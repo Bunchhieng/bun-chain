@@ -8,5 +8,8 @@ import (
 
 // x/bun module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrSample          = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrCommentOld      = sdkerrors.Register(ModuleName, 1300, "")
+	ErrID              = sdkerrors.Register(ModuleName, 1400, "")
+	ErrCommentNotFound = sdkerrors.Register(ModuleName, 1500, "Comment doesn't exist")
 )
