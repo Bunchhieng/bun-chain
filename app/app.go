@@ -107,6 +107,9 @@ import (
 	bunmodule "bun/x/bun"
 	bunmodulekeeper "bun/x/bun/keeper"
 	bunmoduletypes "bun/x/bun/types"
+	dexmodule "bun/x/dex"
+	dexmodulekeeper "bun/x/dex/keeper"
+	dexmoduletypes "bun/x/dex/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "bun/app/params"
@@ -166,6 +169,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		bunmodule.AppModuleBasic{},
+		dexmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -179,6 +183,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		dexmoduletypes.ModuleName:      {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -239,7 +244,9 @@ type App struct {
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
-	BunKeeper bunmodulekeeper.Keeper
+	BunKeeper       bunmodulekeeper.Keeper
+	ScopedDexKeeper capabilitykeeper.ScopedKeeper
+	DexKeeper       dexmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -285,6 +292,7 @@ func New(
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		icacontrollertypes.StoreKey,
 		bunmoduletypes.StoreKey,
+		dexmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -510,6 +518,21 @@ func New(
 	)
 	bunModule := bunmodule.NewAppModule(appCodec, app.BunKeeper, app.AccountKeeper, app.BankKeeper)
 
+	scopedDexKeeper := app.CapabilityKeeper.ScopeToModule(dexmoduletypes.ModuleName)
+	app.ScopedDexKeeper = scopedDexKeeper
+	app.DexKeeper = *dexmodulekeeper.NewKeeper(
+		appCodec,
+		keys[dexmoduletypes.StoreKey],
+		keys[dexmoduletypes.MemStoreKey],
+		app.GetSubspace(dexmoduletypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		scopedDexKeeper,
+		app.BankKeeper,
+	)
+	dexModule := dexmodule.NewAppModule(appCodec, app.DexKeeper, app.AccountKeeper, app.BankKeeper)
+
+	dexIBCModule := dexmodule.NewIBCModule(app.DexKeeper)
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	// Sealing prevents other modules from creating scoped sub-keepers
@@ -519,6 +542,7 @@ func New(
 	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
+	ibcRouter.AddRoute(dexmoduletypes.ModuleName, dexIBCModule)
 	// this line is used by starport scaffolding # ibc/app/router
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -556,6 +580,7 @@ func New(
 		transferModule,
 		icaModule,
 		bunModule,
+		dexModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -586,6 +611,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		bunmoduletypes.ModuleName,
+		dexmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -611,6 +637,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		bunmoduletypes.ModuleName,
+		dexmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -641,6 +668,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		bunmoduletypes.ModuleName,
+		dexmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -671,6 +699,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		bunModule,
+		dexModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -870,6 +899,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(bunmoduletypes.ModuleName)
+	paramsKeeper.Subspace(dexmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

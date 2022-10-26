@@ -1,10 +1,12 @@
 // THIS FILE IS GENERATED AUTOMATICALLY. DO NOT MODIFY.
 
 import BunBun from './bun.bun'
+import BunDex from './bun.dex'
 
 
 export default { 
   BunBun: load(BunBun, 'bun.bun'),
+  BunDex: load(BunDex, 'bun.dex'),
   
 }
 
